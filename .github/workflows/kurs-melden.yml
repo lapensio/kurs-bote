@@ -1,0 +1,39 @@
+# Kurs-Bote: meldet alle 10 Minuten die aktuellen Kurse an die
+# Spiel-Datenbank des Börsenspiels auf sek1.ch (Details im Kopf von
+# kurse-melden.mjs). Öffentliches Repo -> die Action läuft gratis;
+# GitHub nimmt es mit den Zeiten nicht genau (ein paar Minuten Verzug
+# sind normal, einzelne Läufe fallen aus - fürs Spiel unerheblich).
+name: Kurs-Melden
+
+on:
+  schedule:
+    - cron: "0,10,20,30,40,50 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kurs-melden
+  cancel-in-progress: false
+
+jobs:
+  melden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kurse holen und melden
+        env:
+          KURS_GEHEIM: ${{ secrets.KURS_GEHEIM }}
+        run: node kurse-melden.mjs
+      # GitHub schaltet den Zeitplan ab, wenn 60 Tage lang niemand committet.
+      # Darum alle ~50 Tage ein Lebenszeichen-Commit aus der Action selbst.
+      - name: Lebenszeichen (Cron-Abschaltung verhindern)
+        run: |
+          letzte=$(git log -1 --format=%ct)
+          if [ $(( $(date +%s) - letzte )) -gt $(( 50*24*3600 )) ]; then
+            git config user.name "kurs-bote"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Lebenszeichen (haelt den 10-Minuten-Zeitplan aktiv)"
+            git push
+          fi
