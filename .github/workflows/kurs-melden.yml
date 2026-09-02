@@ -1,13 +1,13 @@
-# Kurs-Bote: meldet alle 10 Minuten die aktuellen Kurse an die
-# Spiel-Datenbank des Börsenspiels auf sek1.ch (Details im Kopf von
-# kurse-melden.mjs). Öffentliches Repo -> die Action läuft gratis;
-# GitHub nimmt es mit den Zeiten nicht genau (ein paar Minuten Verzug
-# sind normal, einzelne Läufe fallen aus - fürs Spiel unerheblich).
+# Kurs-Bote: NUR NOCH MANUELLER RESERVE-MELDER (seit 02.09.2026).
+# Die 10-Minuten-Kurse meldet die «Datenbank-Uhr» in Supabase (pg_cron-Job
+# «kurse-melden-10min» ruft die Supabase-Funktion kurse-melden auf – derselbe
+# Ablauf wie kurse-melden.mjs hier). Grund: GitHub liess den 10-Minuten-
+# Zeitplan dieses Repos nur alle 2 bis 4 Stunden laufen (Zeitpläne sind bei
+# GitHub «best effort»). Dieser Workflow bleibt als Reserve: im Actions-Tab
+# von Hand startbar, wenn die Datenbank-Uhr einmal ausfällt.
 name: Kurs-Melden
 
 on:
-  schedule:
-    - cron: "0,10,20,30,40,50 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -26,14 +26,3 @@ jobs:
         env:
           KURS_GEHEIM: ${{ secrets.KURS_GEHEIM }}
         run: node kurse-melden.mjs
-      # GitHub schaltet den Zeitplan ab, wenn 60 Tage lang niemand committet.
-      # Darum alle ~50 Tage ein Lebenszeichen-Commit aus der Action selbst.
-      - name: Lebenszeichen (Cron-Abschaltung verhindern)
-        run: |
-          letzte=$(git log -1 --format=%ct)
-          if [ $(( $(date +%s) - letzte )) -gt $(( 50*24*3600 )) ]; then
-            git config user.name "kurs-bote"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit --allow-empty -m "Lebenszeichen (haelt den 10-Minuten-Zeitplan aktiv)"
-            git push
-          fi
