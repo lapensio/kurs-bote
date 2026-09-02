@@ -28,11 +28,12 @@ if (!geheim) {
 // Symbol-Listen (Kopie aus lapensio/schule, werkzeuge/symbole.mjs – dort
 // stehen die Begründungen zu jedem Symbol).
 const YAHOO = {
-  WELT: "^990100-USD-STRD",
-  SPX: "^GSPC",
-  NDX: "^NDX",
-  SMI: "^SSMI",
-  STOXX50: "^STOXX50E",
+  // Owner 02.09.2026: ETFs der Heimatbörsen statt Index-Punktestände
+  IWDA: "IWDA.L",
+  SPY: "SPY",
+  QQQ: "QQQ",
+  SMICHA: "SMICHA.SW",
+  EUN2: "EUN2.DE",
   NVDA: "NVDA", AAPL: "AAPL", GOOGL: "GOOGL", MSFT: "MSFT",
   AMZN: "AMZN", TSLA: "TSLA",
   ROG: "RO.SW", NOVN: "NOVN.SW", NESN: "NESN.SW", UBSG: "UBSG.SW",
@@ -42,7 +43,7 @@ const YAHOO = {
   SILBER: "SI=F"
 };
 const DEVISEN = { USDCHF: "USDCHF=X", EURCHF: "EURCHF=X" };
-const WAEHRUNG_FALLBACK = { WELT: "USD", STOXX50: "EUR" };
+const WAEHRUNG_FALLBACK = {};
 const KRYPTO = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana", BNB: "binancecoin", XRP: "ripple" };
 
 async function holJson(url, kopf) {
